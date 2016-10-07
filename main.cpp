@@ -19,7 +19,7 @@ struct ct_image
 };
 
 ct_image images[] = {
-					{"images/1/img_1.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
+					{"images/1/img_2.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
 					};
 
 bool makeCTXiao(ct_image images);
@@ -31,22 +31,20 @@ Mat RemoveChannel(Mat mat);
 int main()
 {
 	unsigned img_pack = 0;
-	makeCTXiao(images[img_pack]);
-	/*if(makeCTXiao(images[img_pack]))
+	if(makeCTXiao(images[img_pack]))
 	{
 		Mat res_pic = imread(images[img_pack].result);
 		imshow(WND_NAME_RES, res_pic);
 		waitKey(0);
-	}*/
-	_getch();
+	}
 	return 0;
 }
 bool makeCTXiao(ct_image images)
 {
 	Mat imgs = imread(images.source);
 	Mat imgt = imread(images.target);
-	imgs.convertTo(imgs, CV_32FC3, 1 / 255.0);
-	imgt.convertTo(imgt, CV_32FC3, 1 / 255.0);
+	imgs.convertTo(imgs, CV_64FC3, 1 / 255.0);
+	imgt.convertTo(imgt, CV_64FC3, 1 / 255.0);
 	Mat src_T, src_R, src_S;
 	Mat tar_T, tar_R, tar_S;
 	GetTRS(imgs, src_T, src_R, src_S);
@@ -62,68 +60,64 @@ bool makeCTXiao(ct_image images)
 	std::cout << "tar_T\n" << tar_T << std::endl;
 
 	Mat img_4 = AddChannel(imgt);
-	std::cout << img_4.at<Vec4f>(0, 0) << std::endl;
+	std::cout << img_4.at<Vec4d>(0, 0) << std::endl;
 	imshow(WND_NAME_RES, img_4);
 	waitKey(0);
 	Mat result;
 	transform(img_4, result, mega);
-	std::cout << result.at<Vec4f>(0, 0) << std::endl; // enormous values for CV_32F. If should be from 0 to 1.0
+	std::cout << result.at<Vec4d>(0, 0) << std::endl; // enormous values for CV_64F. If should be from 0 to 1.0
+	result = RemoveChannel(result);
+	result.convertTo(result, CV_8UC3, 255);
 	imshow(WND_NAME_RES, result);
 	waitKey(0);
-	/*
-	//imwrite(images.result, result);
-	imgt.convertTo(imgt, CV_8UC3);
-	imshow(WND_NAME_RES, img_4);
-	waitKey(0);
-	//result.convertTo(result, CV_8UC3);
-	imshow(WND_NAME_RES, result);
-	waitKey(0);*/
+	imwrite(images.result, result);
 	return true;
 }
 void GetTRS(Mat input, Mat& T, Mat& R, Mat& S)
 {
 	Mat cov, means;
-	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, CV_COVAR_NORMAL | CV_COVAR_ROWS, CV_32F);
+	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, CV_COVAR_NORMAL | CV_COVAR_ROWS, CV_64F);
 	Mat U, A, VT;
 	SVD::compute(cov, A, U, VT);
-	T = Mat::eye(4, 4, CV_32FC1);
-	R = Mat::eye(4, 4, CV_32FC1);
-	S = Mat::eye(4, 4, CV_32FC1);
+	T = Mat::eye(4, 4, CV_64FC1);
+	R = Mat::eye(4, 4, CV_64FC1);
+	S = Mat::eye(4, 4, CV_64FC1);
 
 	Rect roi(0, 0, 3, 3);
 	U.copyTo(R(roi));
 	
-	T.at<float>(0, 3) = means.at<float>(0, 0);
-	T.at<float>(1, 3) = means.at<float>(0, 1);
-	T.at<float>(2, 3) = means.at<float>(0, 2);
+	T.at<double>(0, 3) = means.at<double>(0, 0);
+	T.at<double>(1, 3) = means.at<double>(0, 1);
+	T.at<double>(2, 3) = means.at<double>(0, 2);
 
-	S.at<float>(0, 0) = A.at<float>(0, 0);
-	S.at<float>(1, 1) = A.at<float>(1, 0);
-	S.at<float>(2, 2) = A.at<float>(2, 0);
+	// in original paper there is no sqrt()
+	S.at<double>(0, 0) = sqrt(A.at<double>(0, 0));
+	S.at<double>(1, 1) = sqrt(A.at<double>(1, 0));
+	S.at<double>(2, 2) = sqrt(A.at<double>(2, 0));
 }
 void GetSRT(Mat input, Mat& T, Mat& R, Mat& S)
 {
 	Mat cov, means;
-	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, CV_COVAR_NORMAL | CV_COVAR_ROWS, CV_32F);
+	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, CV_COVAR_NORMAL | CV_COVAR_ROWS, CV_64F);
 	Mat U, A, VT;
 	SVD::compute(cov, A, U, VT);
-	T = Mat::eye(4, 4, CV_32FC1);
-	R = Mat::eye(4, 4, CV_32FC1);
-	S = Mat::eye(4, 4, CV_32FC1);
+	T = Mat::eye(4, 4, CV_64FC1);
+	R = Mat::eye(4, 4, CV_64FC1);
+	S = Mat::eye(4, 4, CV_64FC1);
 	Rect roi(0, 0, 3, 3);
 	invert(U, R(roi));
 
-	T.at<float>(0, 3) = -means.at<float>(0, 0);
-	T.at<float>(1, 3) = -means.at<float>(0, 1);
-	T.at<float>(2, 3) = -means.at<float>(0, 2);
+	T.at<double>(0, 3) = -means.at<double>(0, 0);
+	T.at<double>(1, 3) = -means.at<double>(0, 1);
+	T.at<double>(2, 3) = -means.at<double>(0, 2);
 
-	S.at<float>(0, 0) = 1/sqrt(A.at<float>(0, 0));
-	S.at<float>(1, 1) = 1/sqrt(A.at<float>(1, 0));
-	S.at<float>(2, 2) = 1/sqrt(A.at<float>(2, 0));
+	S.at<double>(0, 0) = 1/sqrt(A.at<double>(0, 0));
+	S.at<double>(1, 1) = 1/sqrt(A.at<double>(1, 0));
+	S.at<double>(2, 2) = 1/sqrt(A.at<double>(2, 0));
 }
 Mat AddChannel(Mat mat)
 {
-	Mat img = Mat::ones(mat.size(), CV_32FC4);
+	Mat img = Mat::ones(mat.size(), CV_64FC4);
 	int from_to[] = {0,0, 1,1, 2,2};
 	mixChannels(mat, img, from_to, 3);
 	return img; 
