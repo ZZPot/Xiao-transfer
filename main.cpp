@@ -19,7 +19,7 @@ struct ct_image
 };
 
 ct_image images[] = {
-					{"images/1/img_2.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
+					{"images/1/img_1.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
 					};
 
 bool makeCTXiao(ct_image images);
@@ -61,15 +61,11 @@ bool makeCTXiao(ct_image images)
 
 	Mat img_4 = AddChannel(imgt);
 	std::cout << img_4.at<Vec4d>(0, 0) << std::endl;
-	imshow(WND_NAME_RES, img_4);
-	waitKey(0);
 	Mat result;
 	transform(img_4, result, mega);
-	std::cout << result.at<Vec4d>(0, 0) << std::endl; // enormous values for CV_64F. If should be from 0 to 1.0
+	std::cout << result.at<Vec4d>(0, 0) << std::endl; // for original method it has enormous values for CV_64F. If should be from 0 to 1.0
 	result = RemoveChannel(result);
 	result.convertTo(result, CV_8UC3, 255);
-	imshow(WND_NAME_RES, result);
-	waitKey(0);
 	imwrite(images.result, result);
 	return true;
 }
