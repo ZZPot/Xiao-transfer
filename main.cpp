@@ -67,7 +67,7 @@ bool makeCTXiao(ct_image images)
 	waitKey(0);
 	Mat result;
 	transform(img_4, result, mega);
-	std::cout << result.at<Vec4f>(0, 0) << std::endl; // enormous values
+	std::cout << result.at<Vec4f>(0, 0) << std::endl; // enormous values for CV_32F. If should be from 0 to 1.0
 	imshow(WND_NAME_RES, result);
 	waitKey(0);
 	/*
