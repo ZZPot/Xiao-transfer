@@ -19,7 +19,7 @@ struct ct_image
 };
 
 ct_image images[] = {
-					{"images/1/img_1.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
+					{"images/1/img_2.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
 					};
 
 bool makeCTXiao(ct_image images);
