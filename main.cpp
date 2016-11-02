@@ -49,7 +49,7 @@ bool makeCTXiao(ct_image images)
 	Mat tar_T, tar_R, tar_S;
 	GetTRS(imgs, src_T, src_R, src_S);
 	GetSRT(imgt, tar_T, tar_R, tar_S);
-	Mat mega = src_T * src_R * src_S * tar_S * tar_R * tar_T; // with same image it should be eye;
+	Mat mega = src_T * src_R * src_S * tar_S * tar_R * tar_T;
 	std::cout << "Mega\n" << mega << std::endl;
 	std::cout << "src_T\n" << src_T << std::endl;
 	std::cout << "src_R\n" << src_R << std::endl;
@@ -62,8 +62,9 @@ bool makeCTXiao(ct_image images)
 	Mat img_4 = AddChannel(imgt);
 	std::cout << img_4.at<Vec4d>(0, 0) << std::endl;
 	Mat result;
+	//transpose(mega, mega);
 	transform(img_4, result, mega);
-	std::cout << result.at<Vec4d>(0, 0) << std::endl; // for original method it has enormous values for CV_64F. If should be from 0 to 1.0
+	//std::cout << result.at<Vec4d>(0, 0) << std::endl; // for original method it has enormous values for CV_64F. If should be from 0 to 1.0
 	result = RemoveChannel(result);
 	result.convertTo(result, CV_8UC3, 255);
 	imwrite(images.result, result);
@@ -113,9 +114,14 @@ void GetSRT(Mat input, Mat& T, Mat& R, Mat& S)
 }
 Mat AddChannel(Mat mat)
 {
-	Mat img = Mat::ones(mat.size(), CV_64FC4);
+	/*Mat img = Mat::ones(mat.size(), CV_64FC4);
 	int from_to[] = {0,0, 1,1, 2,2};
-	mixChannels(mat, img, from_to, 3);
+	mixChannels(mat, img, from_to, 3);*/
+	Mat img = Mat::ones(mat.size(), CV_64FC1);
+	std::vector<Mat> channels;
+	split(mat, channels);
+	channels.push_back(img);
+	merge(channels, img);
 	return img; 
 }
 Mat RemoveChannel(Mat mat)
