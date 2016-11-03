@@ -19,7 +19,9 @@ struct ct_image
 };
 
 ct_image images[] = {
-					{"images/1/img_2.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"}
+					{"images/1/img_2.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"},
+					{"images/2/img_4.jpg", "images/2/img_3.jpg", "images/2/img_3_4_xiao.jpg"},
+					{"images/3/img_2.jpg", "images/3/img_1.jpg", "images/3/img_1_2_xiao.jpg"}
 					};
 
 bool makeCTXiao(ct_image images);
@@ -30,7 +32,7 @@ Mat RemoveChannel(Mat mat);
 
 int main()
 {
-	unsigned img_pack = 0;
+	unsigned img_pack = 2;
 	if(makeCTXiao(images[img_pack]))
 	{
 		Mat res_pic = imread(images[img_pack].result);
