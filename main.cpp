@@ -21,7 +21,8 @@ struct ct_image
 ct_image images[] = {
 					{"images/1/img_2.jpg", "images/1/img_1.jpg", "images/1/img_1_2_cv.jpg"},
 					{"images/2/img_4.jpg", "images/2/img_3.jpg", "images/2/img_3_4_xiao.jpg"},
-					{"images/3/img_2.jpg", "images/3/img_1.jpg", "images/3/img_1_2_xiao.jpg"}
+					{"images/3/img_2.jpg", "images/3/img_1.jpg", "images/3/img_1_2_xiao.jpg"},
+					{"images/4/img_1.jpg", "images/4/img_2.jpg", "images/4/img_2_1_xiao.jpg"}
 					};
 
 bool makeCTXiao(ct_image images);
@@ -32,7 +33,7 @@ Mat RemoveChannel(Mat mat);
 
 int main()
 {
-	unsigned img_pack = 2;
+	unsigned img_pack = 3;
 	if(makeCTXiao(images[img_pack]))
 	{
 		Mat res_pic = imread(images[img_pack].result);
@@ -75,7 +76,7 @@ bool makeCTXiao(ct_image images)
 void GetTRS(Mat input, Mat& T, Mat& R, Mat& S)
 {
 	Mat cov, means;
-	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, CV_COVAR_NORMAL | CV_COVAR_ROWS, CV_64F);
+	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, cv::COVAR_NORMAL | cv::COVAR_ROWS, CV_64F);
 	Mat U, A, VT;
 	SVD::compute(cov, A, U, VT);
 	T = Mat::eye(4, 4, CV_64FC1);
@@ -97,7 +98,7 @@ void GetTRS(Mat input, Mat& T, Mat& R, Mat& S)
 void GetSRT(Mat input, Mat& T, Mat& R, Mat& S)
 {
 	Mat cov, means;
-	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, CV_COVAR_NORMAL | CV_COVAR_ROWS, CV_64F);
+	calcCovarMatrix(input.reshape(1, input.cols * input.rows), cov, means, cv::COVAR_NORMAL | cv::COVAR_ROWS, CV_64F);
 	Mat U, A, VT;
 	SVD::compute(cov, A, U, VT);
 	T = Mat::eye(4, 4, CV_64FC1);
